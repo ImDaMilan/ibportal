@@ -52,46 +52,49 @@ class _NoteAppState extends State<NoteApp> {
             ),
           ),
           Expanded(
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                childAspectRatio: 0.8, // Adjust this value for smaller boxes
-              ),
-              itemCount: subjects.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  elevation: 5,
-                  color: Colors.blueGrey.shade800,
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => WritingTypeSelection(
-                            subject: subjects[index]['name'],
-                            notes: notes,
+            child: Center(
+              child: GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  childAspectRatio: 0.8,
+                ),
+                itemCount: subjects.length,
+                itemBuilder: (context, index) {
+                  return Card(
+                    elevation: 5,
+                    color: Colors.blueGrey.shade800,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => WritingTypeSelection(
+                              subject: subjects[index]['name'],
+                              notes: notes,
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(subjects[index]['icon'], size: 48), // Smaller icon
-                        const SizedBox(height: 8), // Adjusted spacing
-                        Text(
-                          subjects[index]['name'],
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 18, // Smaller font size
-                            fontWeight: FontWeight.bold,
+                        );
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(subjects[index]['icon'], size: 48),
+                          const SizedBox(height: 8),
+                          Text(
+                            subjects[index]['name'],
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ],
@@ -104,7 +107,11 @@ class WritingTypeSelection extends StatelessWidget {
   final String subject;
   final Map<String, Map<String, List<String>>> notes;
 
-  const WritingTypeSelection({super.key, required this.subject, required this.notes});
+  const WritingTypeSelection({
+    Key? key,
+    required this.subject,
+    required this.notes,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -112,50 +119,56 @@ class WritingTypeSelection extends StatelessWidget {
       appBar: AppBar(
         title: Text(subject),
       ),
-      body: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 1.2, // Adjust this value for smaller boxes
-        ),
-        itemCount: 4,
-        itemBuilder: (context, index) {
-          List<String> writingTypes = ['Notes', 'Essay', 'Revision', 'Homework'];
-          List<IconData> icons = [Icons.note, Icons.edit, Icons.description, Icons.assignment];
+      body: Center(
+        child: GridView.builder(
+          shrinkWrap: true,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: MediaQuery.of(context).size.width /
+                (MediaQuery.of(context).size.height / 2),
+            crossAxisSpacing: 16.0,
+            mainAxisSpacing: 16.0,
+          ),
+          itemCount: 4,
+          itemBuilder: (context, index) {
+            List<String> writingTypes = ['Notes', 'Essay', 'Revision', 'Homework'];
+            List<IconData> icons = [Icons.note, Icons.edit, Icons.description, Icons.assignment];
 
-          return Card(
-            elevation: 5,
-            color: Colors.blueGrey.shade800,
-            child: InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DocumentPage(
-                      subject: subject,
-                      notes: notes,
-                      writingType: writingTypes[index],
+            return Card(
+              elevation: 5,
+              color: Colors.blueGrey.shade800,
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DocumentPage(
+                        subject: subject,
+                        notes: notes,
+                        writingType: writingTypes[index],
+                      ),
                     ),
-                  ),
-                );
-              },
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(icons[index], size: 48), // Smaller icon
-                  const SizedBox(height: 8), // Adjusted spacing
-                  Text(
-                    writingTypes[index],
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 18, // Smaller font size
-                      fontWeight: FontWeight.bold,
+                  );
+                },
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(icons[index], size: 48),
+                    const SizedBox(height: 8),
+                    Text(
+                      writingTypes[index],
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -166,11 +179,12 @@ class DocumentPage extends StatefulWidget {
   final Map<String, Map<String, List<String>>> notes;
   final String writingType;
 
-  const DocumentPage({super.key,
+  const DocumentPage({
+    Key? key,
     required this.subject,
     required this.notes,
     required this.writingType,
-  });
+  }) : super(key: key);
 
   @override
   _DocumentPageState createState() => _DocumentPageState();
