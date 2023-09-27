@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MaterialApp(
@@ -99,9 +100,144 @@ class _NoteAppState extends State<NoteApp> {
               ),
             ),
           ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LiveClassPage(),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white10,
+              minimumSize: const Size(480, 65),
+            ),
+            child: const Text('Join Live Class'),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
+  }
+}
+
+class LiveClassPage extends StatefulWidget {
+  const LiveClassPage({Key? key}) : super(key: key);
+
+  @override
+  _LiveClassPageState createState() => _LiveClassPageState();
+}
+
+class _LiveClassPageState extends State<LiveClassPage> {
+  String imageUrl = '';
+
+  TextEditingController imageUrlController = TextEditingController();
+  GlobalKey<_LiveImageState> imageKey = GlobalKey();
+
+  Future<void> loadImage() async {
+    final response = await http.get(Uri.parse('https://ibhubrestapi.onrender.com/live'));
+
+    if (response.statusCode == 200) {
+      setState(() {
+        imageUrl = response.headers['ActiveImage-URL'] ?? '';
+      });
+    }
+  }
+
+  // Function to update the image URL via a POST request
+  Future<void> updateImageUrl(String newImageUrl) async {
+    final response = await http.post(
+      Uri.parse('https://ibhubrestapi.onrender.com/live'),
+      headers: {'ActiveImage-URL': newImageUrl},
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        imageUrl = newImageUrl;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Live Class'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            ElevatedButton(
+              onPressed: loadImage,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white10,
+                minimumSize: const Size(270, 50),
+              ),
+              child: const Text('Load Image'),
+            ),
+            const SizedBox(height: 16),
+            Image.network(
+                imageUrl,
+                alignment: Alignment.center,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Text('No image currently active!');
+                },
+                key: imageKey,
+                width: MediaQuery.of(context).size.width * 0.75,
+                height: MediaQuery.of(context).size.height * 0.75,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: imageUrlController,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Enter Image URL',
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                final newImageUrl = imageUrlController.text;
+                updateImageUrl(newImageUrl);
+                imageKey.currentState?.reloadImage();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white10,
+                minimumSize: const Size(270, 50),
+              ),
+              child: const Text('Update Image URL'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class LiveImage extends StatefulWidget {
+  final String imageUrl;
+
+  const LiveImage({
+    required this.imageUrl,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  _LiveImageState createState() => _LiveImageState();
+}
+
+class _LiveImageState extends State<LiveImage> {
+  // A key method to trigger a rebuild of this widget
+  void reloadImage() {
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.network(widget.imageUrl); // Display the image
   }
 }
 
