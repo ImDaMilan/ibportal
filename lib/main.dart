@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 void main() {
   runApp(MaterialApp(
@@ -192,7 +194,16 @@ class DocumentPage extends StatefulWidget {
 
 class _DocumentPageState extends State<DocumentPage> {
   final TextEditingController documentController = TextEditingController();
-  final TextEditingController imageController = TextEditingController();
+  List<File> pickedImages = [];
+
+  Future<void> _pickImages() async {
+    final picker = ImagePicker();
+    final pickedFiles = await picker.pickMultiImage();
+
+    setState(() {
+      pickedImages = pickedFiles.map((pickedFile) => File(pickedFile.path)).toList();
+    });
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -206,9 +217,21 @@ class _DocumentPageState extends State<DocumentPage> {
             child: ListView.builder(
               itemCount: (widget.notes[widget.subject]?[widget.writingType]?.length) ?? 0,
               itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(widget.notes[widget.subject]?[widget.writingType]?[index] ?? ""),
-                );
+                final item = widget.notes[widget.subject]?[widget.writingType]?[index];
+                if (item!.startsWith("ImageFile:")) {
+                  return ListTile(
+                    title: Image.file(
+                      File(item.substring(10)),
+                      alignment: Alignment.centerLeft,
+                      width: 300,
+                      height: 300,
+                    ),
+                  );
+                } else {
+                  return ListTile(
+                    title: Text("• $item"),
+                  );
+                }
               },
             ),
           ),
@@ -223,21 +246,31 @@ class _DocumentPageState extends State<DocumentPage> {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: imageController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Add Images (URLs)',
-              ),
-            ),
+          ElevatedButton(
+            onPressed: _pickImages,
+            child: const Text('Pick Images'),
           ),
+          const SizedBox(height: 16),
+          if (pickedImages.isNotEmpty)
+            Column(
+              children: [
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: pickedImages.map((image) {
+                    return SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: Image.file(image),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
           ElevatedButton(
             onPressed: () {
               setState(() {
                 final documentText = documentController.text;
-                final imageUrls = imageController.text.split('\n');
 
                 if (widget.notes[widget.subject] == null) {
                   widget.notes[widget.subject] = {};
@@ -247,15 +280,19 @@ class _DocumentPageState extends State<DocumentPage> {
                   widget.notes[widget.subject]?[widget.writingType] = [];
                 }
 
+                // Save the text data
                 widget.notes[widget.subject]?[widget.writingType]?.add(documentText);
-                widget.notes[widget.subject]?[widget.writingType]?.addAll(imageUrls);
+
+                // Save the image files
+                widget.notes[widget.subject]?[widget.writingType]?.addAll(pickedImages.map((image) => "ImageFile:${image.path}"));
 
                 documentController.clear();
-                imageController.clear();
+                pickedImages.clear();
               });
             },
             child: Text('Save ${widget.writingType}'),
           ),
+          const SizedBox(height: 16),
         ],
       ),
     );
