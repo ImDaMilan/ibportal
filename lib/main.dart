@@ -5,8 +5,8 @@ import 'dart:io';
 void main() {
   runApp(MaterialApp(
     theme: ThemeData.dark().copyWith(
-      primaryColor: Colors.blueGrey,
-      scaffoldBackgroundColor: Colors.blueGrey.shade900,
+      primaryColor: Colors.white12,
+      scaffoldBackgroundColor: Colors.white12,
     ),
     home: const NoteApp(),
   ));
@@ -45,7 +45,7 @@ class _NoteAppState extends State<NoteApp> {
           const Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
-              "IB Portal",
+              "IB Hub",
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
@@ -65,7 +65,7 @@ class _NoteAppState extends State<NoteApp> {
                 itemBuilder: (context, index) {
                   return Card(
                     elevation: 5,
-                    color: Colors.blueGrey.shade800,
+                    color: Colors.white10,
                     child: InkWell(
                       onTap: () {
                         Navigator.push(
@@ -138,7 +138,7 @@ class WritingTypeSelection extends StatelessWidget {
 
             return Card(
               elevation: 5,
-              color: Colors.blueGrey.shade800,
+              color: Colors.white10,
               child: InkWell(
                 onTap: () {
                   Navigator.push(
@@ -248,7 +248,11 @@ class _DocumentPageState extends State<DocumentPage> {
           ),
           ElevatedButton(
             onPressed: _pickImages,
-            child: const Text('Pick Images'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white10,
+              minimumSize: const Size(270, 50),
+            ),
+            child: const Text('Pick Images')
           ),
           const SizedBox(height: 16),
           if (pickedImages.isNotEmpty)
@@ -265,6 +269,7 @@ class _DocumentPageState extends State<DocumentPage> {
                     );
                   }).toList(),
                 ),
+                const SizedBox(height: 8),
               ],
             ),
           ElevatedButton(
@@ -280,16 +285,17 @@ class _DocumentPageState extends State<DocumentPage> {
                   widget.notes[widget.subject]?[widget.writingType] = [];
                 }
 
-                // Save the text data
                 widget.notes[widget.subject]?[widget.writingType]?.add(documentText);
-
-                // Save the image files
                 widget.notes[widget.subject]?[widget.writingType]?.addAll(pickedImages.map((image) => "ImageFile:${image.path}"));
 
                 documentController.clear();
                 pickedImages.clear();
               });
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white10,
+              minimumSize: const Size(270, 50),
+            ),
             child: Text('Save ${widget.writingType}'),
           ),
           const SizedBox(height: 16),
